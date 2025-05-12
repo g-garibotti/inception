@@ -1,0 +1,13 @@
+[mysqld]
+datadir = /var/lib/mysql
+socket = /run/mysqld/mysqld.sock
+bind-address = 0.0.0.0
+port = 3306
+user = mysql
+skip-networking = false
+max_allowed_packet = 64M
+innodb_buffer_pool_size = 64M
+
+# Skip file lock issues for containerized environments
+skip-host-cache
+skip-name-resolve
