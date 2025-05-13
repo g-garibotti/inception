@@ -36,5 +36,8 @@ RUN chmod +x /usr/local/bin/wp_setup.sh
 # Expose port 9000
 EXPOSE 9000
 
-# Start PHP-FPM and run WordPress setup
-CMD ["sh", "-c", "wp_setup.sh && php-fpm7.3 -F"]
+# Set up entrypoint
+ENTRYPOINT ["/usr/local/bin/wp_setup.sh"]
+
+# Default command after entrypoint
+CMD ["php-fpm7.3", "-F"]

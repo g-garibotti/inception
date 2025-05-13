@@ -11,5 +11,5 @@ RUN chmod +x /usr/local/bin/init_db.sh
 
 EXPOSE 3306
 
-# Start MySQL service
-CMD ["sh", "-c", "init_db.sh && mysqld"]
+# Use direct execution of the initialization script
+CMD ["/usr/local/bin/init_db.sh"]
