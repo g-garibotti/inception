@@ -1,0 +1,30 @@
+# Environment variables
+.env
+
+# Data directories
+/home/ggaribot/data/
+
+# Certificates and keys
+*.crt
+*.key
+*.pem
+
+# Docker artifacts
+.docker/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+tmp/
+temp/
