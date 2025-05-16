@@ -1,57 +1,77 @@
-version: '3'
-
-networks:                   
-  inception-network:
-    driver: bridge
-
-volumes:
-  wordpress_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/ggaribot/data/wordpress
-      o: bind
-  mariadb_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/ggaribot/data/mariadb
-      o: bind
-
 services:
-  nginx:
-    container_name: nginx
-    build: ./requirements/nginx
-    ports:
-      - "443:443"
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb
+    restart: on-failure
+    env_file: .env
+    environment:
+      DOMAIN_NAME:       ${DOMAIN_NAME}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_USER:          ${MARIADB_USER}
+      MARIADB_PASSWORD:      ${MARIADB_USER_PASSWORD}
+      MARIADB_DATABASE:      ${MARIADB_NAME}
     volumes:
-      - wordpress_data:/var/www/html
+      - mariadb:/var/lib/mysql
     networks:
       - inception-network
-    depends_on:
-      - wordpress
-    restart: always
 
   wordpress:
     container_name: wordpress
     build: ./requirements/wordpress
-    volumes:
-      - wordpress_data:/var/www/html
-    networks:
-      - inception-network
+    restart: on-failure
+    env_file: .env
     depends_on:
       - mariadb
-    env_file:
-      - .env
-    restart: always
-
-  mariadb:
-    container_name: mariadb
-    build: ./requirements/mariadb
+    environment:
+      WORDPRESS_DB_HOST:     mariadb
+      WORDPRESS_DB_NAME:     ${MARIADB_NAME}
+      WORDPRESS_DB_USER:     ${MARIADB_USER}
+      WORDPRESS_DB_PASSWORD: ${MARIADB_USER_PASSWORD}
+      DOMAIN_NAME:           ${DOMAIN_NAME}
+      WP_TITLE:              ${TITLE}
+      WP_ADMIN_USER:         ${WP_ADMIN_USER}
+      WP_ADMIN_PASSWORD:     ${WP_ADMIN_PASSWORD}
+      WP_ADMIN_EMAIL:        ${WP_ADMIN_EMAIL}
+      WP_USER:               ${WP_USER}
+      WP_USER_PASSWORD:      ${WP_USER_PASSWORD}
+      WP_USER_EMAIL:         ${WP_USER_EMAIL}
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - wordpress:/var/www/html/wordpress
     networks:
       - inception-network
-    env_file:
-      - .env
-    restart: always
+
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx
+    restart: on-failure
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress:/var/www/html/wordpress:ro
+      - ./requirements/nginx/conf/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+    networks:
+      - inception-network
+
+networks:
+  inception-network:
+    name: inception
+    driver: bridge
+
+volumes:
+  mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/data/mariadb
+
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/data/wordpress

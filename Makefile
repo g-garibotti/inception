@@ -1,28 +1,31 @@
-NAME = inception
-DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
+COMPOSE := docker compose -f srcs/docker-compose.yml
 
-all: build up
+DATA_DIR   := $(HOME)/data
+MARIADB_DIR := $(DATA_DIR)/mariadb
+WP_DIR     := $(DATA_DIR)/wordpress
 
-build:
-	mkdir -p /home/ggaribot/data/wordpress
-	mkdir -p /home/ggaribot/data/mariadb
-	$(DOCKER_COMPOSE) build
+.PHONY: all up down delete clean log re
+
+all: up
 
 up:
-	$(DOCKER_COMPOSE) up -d
+	@mkdir -p $(MARIADB_DIR) $(WP_DIR)
+	@$(COMPOSE) up --build -d
 
 down:
-	$(DOCKER_COMPOSE) down
+	@$(COMPOSE) down
 
-clean: down
-	docker rmi -f $$(docker images -q)
-	docker volume rm $$(docker volume ls -q)
-	sudo rm -rf /home/ggaribot/data/wordpress/*
-	sudo rm -rf /home/ggaribot/data/mariadb/*
+delete:
+	@sudo rm -rf $(DATA_DIR)/*
 
-fclean: clean
-	docker system prune -af
+clean: delete
+	-@docker stop $$(docker ps -qa)
+	-@docker rm   $$(docker ps -qa)
+	-@docker rmi -f $$(docker images -qa)
+	-@docker volume rm $$(docker volume ls -q)
+	-@docker network rm $$(docker network ls -q) 2>/dev/null
 
-re: fclean all
+log:
+	@$(COMPOSE) logs
 
-.PHONY: all build up down clean fclean re
+re: clean all

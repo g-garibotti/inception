@@ -1,19 +1,21 @@
-FROM debian:bullseye
+FROM debian:bullseye-slim
 
-RUN apt-get update && apt-get install -y nginx openssl
+RUN apt-get update && \
+    apt-get install -y nginx openssl curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# SSL certificate pour secur
-RUN mkdir -p /etc/nginx/ssl
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/ssl/nginx.key \
-    -out /etc/nginx/ssl/nginx.crt \
-    -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=ggaribot.42.fr"
+RUN mkdir -p /etc/nginx/ssl /var/run/nginx
 
-# chope conf prep
-COPY ./conf/nginx.conf /etc/nginx/conf.d/default.conf
+RUN openssl req -x509 -nodes \
+    -out /etc/nginx/ssl/inception.crt \
+    -keyout /etc/nginx/ssl/inception.key \
+    -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=ggaribot.42.fr/UID=ggaribot"
 
-# port 443 for HTTPS
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+
+RUN chmod 755 /var/www/html && \
+    chown -R www-data:www-data /var/www/html
+
 EXPOSE 443
 
-# Start cmd
 CMD ["nginx", "-g", "daemon off;"]

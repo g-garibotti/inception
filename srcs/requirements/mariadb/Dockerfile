@@ -1,15 +1,13 @@
-FROM debian:bullseye
+FROM debian:bullseye-slim
 
-RUN apt-get update && apt-get install -y mariadb-server
+RUN apt update -y && \
+    apt install -y mariadb-server && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy configuration files
-COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY mariadb.sh /usr/local/bin/mariadb.sh
+RUN chmod +x /usr/local/bin/mariadb.sh
 
-# Copy initialization script
-COPY ./tools/init_db.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init_db.sh
+ENTRYPOINT ["sh", "/usr/local/bin/mariadb.sh"]
 
-EXPOSE 3306
 
-# Use direct execution of the initialization script
-CMD ["/usr/local/bin/init_db.sh"]
