@@ -1,6 +1,6 @@
 version: '3'
 
-networks:
+networks:                   
   inception-network:
     driver: bridge
 

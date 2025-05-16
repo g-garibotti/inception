@@ -2,7 +2,7 @@
 .env
 
 # Data directories
-/home/ggaribot/data/
+data/
 
 # Certificates and keys
 *.crt
