@@ -10,7 +10,7 @@ all: up
 
 up:
 	@mkdir -p $(MARIADB_DIR) $(WP_DIR)
-	@$(COMPOSE) up --build -d
+	@$(COMPOSE) up --build
 
 down:
 	@$(COMPOSE) down
